@@ -1,0 +1,100 @@
+--
+-- Copyright 2016 Alexandre Terrasa <alexandre@moz-code.org>.
+--
+-- Licensed under the Apache License, Version 2.0 (the "License");
+-- you may not use this file except in compliance with the License.
+-- You may obtain a copy of the License at
+--
+--      http://www.apache.org/licenses/LICENSE-2.0
+--
+-- Unless required by applicable law or agreed to in writing, software
+-- distributed under the License is distributed on an "AS IS" BASIS,
+-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-- See the License for the specific language governing permissions and
+-- limitations under the License.
+--
+model Universite
+
+class Cours
+
+	attributes
+		sigle: String
+		coef: Real
+
+end
+
+class Etudiant
+
+	attributes
+
+		nom: String
+		moyenne: Real
+		estInscrit: Boolean
+
+	operations
+
+		renomer(nouveauNom: String)
+		gfetNom(): String
+		inscrire()
+
+end
+
+class Professeur
+	attributes
+		nom: String
+		age: Integer
+		matricule: String
+end
+
+class Universite
+end
+
+association ProfUni between
+	Professeur [*] role professeurs
+	Universite [1] role universite
+end
+
+association ProfCours between
+	Professeur [1] role professeur
+	Cours [*] role cours
+end
+
+association CoursUni between
+	Cours [*] role cours
+	Universite [1] role universite
+end
+
+association CoursEtudiant between
+	Cours [*] role cours
+	Etudiant [*] role etudiants
+end
+
+constraints
+
+	context Universite
+
+		-- Au moins un employé à plus de 50 ans.
+		inv: professeurs->select(age > 50)->notEmpty()
+
+		-- Au moins un employé à plus de 50 ans (reject version).
+		inv: professeurs->reject(age <= 50)->notEmpty()
+
+		-- Tous les professeurs doivent être majeurs.
+		inv: professeurs->forAll(age >= 18)
+
+		-- Deux professeurs d’une même université ne peuvent partager le même matricule.
+		inv: professeurs->forAll(p1, p2 |
+				p1 <> p2 implies p1.matricule <> p2.matricule)
+
+		-- équivalent
+		inv: professeurs->forAll(p1 |
+				self.professeurs->forAll(p2 | p1 <> p2
+					implies p1.matricule <> p2.matricule))
+
+	context Etudiant
+
+		-- Tous les étudiants doivent suivre le cours ayant pour sigle “INF1120”
+		inv: cours->collect(sigle)->includes('INF1120')
+
+		-- Tous les étudiants doivent suivre le cours ayant pour sigle “INF1120”
+		inv: cours->exists(sigle = 'INF1120')
