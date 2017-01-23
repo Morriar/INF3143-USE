@@ -18,20 +18,26 @@
 !create c1:Compte
 !set c1.solde := 0.0
 
--- Check success on c1.getSolde
-!openter c1 getSolde()
-!opexit 0.0 -- same as self.solde
+-- Faire réussir la pré-condition sur c1.crediter()
+!openter c1 crediter(10)
 
--- Check failure on c1.getSolde
-!openter c1 getSolde()
-!opexit 10.0 -- different than self.solde
+-- Faire échouer la pré-condition sur c1.crediter()
+!openter c1 crediter(-10)
 
--- Check success on c1.crediter()
+-- Faire réussir la post-condition sur c1.getSolde()
+!openter c1 getSolde()
+!opexit 0.0 -- = c1.solde
+
+-- Faire échouer la post-condition sur c1.getSolde()
+!openter c1 getSolde()
+!opexit 10.0 -- <> self.solde
+
+-- Faire réussir la post-condition sur c1.crediter()
 !openter c1 crediter(10.0)
-!set self.solde := 10.0 -- simulate operation side effects
+!set self.solde := 10.0 -- effet correct
 !opexit
 
--- Check failure on c1.crediter()
+-- Faire échouer la post-condition sur c1.crediter()
 !openter c1 crediter(10.0)
-!set self.solde := 0.0 -- simulate operation side effects
+!set self.solde := 0.0 -- effet incorrect
 !opexit
