@@ -1,0 +1,62 @@
+--
+-- Copyright 2016 Alexandre Terrasa <alexandre@moz-code.org>.
+--
+-- Licensed under the Apache License, Version 2.0 (the "License");
+-- you may not use this file except in compliance with the License.
+-- You may obtain a copy of the License at
+--
+--      http://www.apache.org/licenses/LICENSE-2.0
+--
+-- Unless required by applicable law or agreed to in writing, software
+-- distributed under the License is distributed on an "AS IS" BASIS,
+-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-- See the License for the specific language governing permissions and
+-- limitations under the License.
+--
+model exercice1
+
+class Universite
+end
+
+class Professeur
+	attributes
+		nom: String
+end
+
+class Cours
+	attributes
+		sigle: String
+		coef: Real
+end
+
+association ProfesseurUniversite between
+	Professeur [*] role professeurs
+	Universite [1]
+end
+
+association ProfesseurCours between
+	Professeur [1]
+	Cours [*] role cours
+end
+
+association UniversiteCours between
+	Universite [1]
+	Cours [*] role cours
+end
+
+constraints
+
+context Professeur
+	-- Le nom d’un professeur ne peut être nul
+	inv: nom <> null
+
+context Cours
+
+	-- Le sigle d’un cours fait toujours 3 caractères
+	inv: sigle.size() = 3
+
+	-- Le coefficient d’un cours est entre 0.0 et 100.0
+	inv: coef >= 0.0 and coef <= 100.0
+
+	-- Un professeur doit travailler dans l’université qui dispense le cours pour l’enseigne
+	inv: universite = professeur.universite

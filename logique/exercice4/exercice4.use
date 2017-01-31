@@ -1,0 +1,78 @@
+--
+-- Copyright 2016 Alexandre Terrasa <alexandre@moz-code.org>.
+--
+-- Licensed under the Apache License, Version 2.0 (the "License");
+-- you may not use this file except in compliance with the License.
+-- You may obtain a copy of the License at
+--
+--      http://www.apache.org/licenses/LICENSE-2.0
+--
+-- Unless required by applicable law or agreed to in writing, software
+-- distributed under the License is distributed on an "AS IS" BASIS,
+-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-- See the License for the specific language governing permissions and
+-- limitations under the License.
+--
+model exercice4
+
+class Assure
+	operations
+		valeurVehicule(): Integer
+end
+
+class Permis
+	attributes
+		points: Integer
+	operations
+		retirerPoints(p: Integer)
+end
+
+class Assurance
+	attributes
+		categorie: String
+		valeur: Integer
+end
+
+class Vehicule
+	attributes
+		categorie: String
+		valeur: Integer
+end
+
+association AssurePermis between
+	Assure [0..1]
+	Permis [0..1]
+end
+
+association AssureAssurance between
+	Assure [1]
+	Assurance [0..1]
+end
+
+association AssuranceVehicule between
+	Assurance [0..1]
+	Vehicule [1]
+end
+
+constraints
+
+context Assure
+	inv: assurance <> null implies permis.points > 0
+
+context Permis::retirerPoints(p: Integer)
+	-- p est strictement positif
+	pre: p > 0
+	-- retire p points
+	post: points = points@pre - p
+
+context Assure::valeurVehicule(): Integer
+	-- assurance.vehicule.valeur ou 0.0
+	post: result = if assurance <> null then assurance.vehicule.valeur else 0 endif
+
+context Assurance
+	-- “auto” ou “moto”
+	inv: categorie = 'auto' or categorie = 'moto'
+
+context Vehicule
+	-- correspond à l'assurance
+	inv: categorie = assurance.categorie and valeur <= assurance.valeur
