@@ -55,7 +55,7 @@ association ProfUni between
 end
 
 association ProfCours between
-	Professeur [1] role professeur
+	Professeur [1] role professeurs
 	Cours [*] role cours
 end
 
